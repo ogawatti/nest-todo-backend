@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpException,
+  HttpStatus,
+  HttpCode,
+} from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -19,16 +30,33 @@ export class TasksController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.tasksService.findOne(+id);
+    const task = this.tasksService.findOne(+id);
+
+    if (task) {
+      return task;
+    } else {
+      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    }
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.tasksService.update(+id, updateTaskDto);
+    const task = this.tasksService.update(+id, updateTaskDto);
+
+    if (task) {
+      return task;
+    } else {
+      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    }
   }
 
   @Delete(':id')
+  @HttpCode(204)
   remove(@Param('id') id: string) {
-    return this.tasksService.remove(+id);
+    const task = this.tasksService.remove(+id);
+
+    if (!task) {
+      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    }
   }
 }

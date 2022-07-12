@@ -4,23 +4,45 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable()
 export class TasksService {
+  private readonly tasks = [
+    { id: 1, contents: 'generate resource', done: true },
+    { id: 2, contents: 'add api prefix to path', done: true },
+    { id: 3, contents: 'return json', done: false },
+  ];
+  private lastId = 4;
+
   create(createTaskDto: CreateTaskDto) {
-    return 'This action adds a new task';
+    this.lastId++;
+    const task = {
+      id: this.lastId,
+      contents: createTaskDto.contents,
+      done: false,
+    };
+    this.tasks.push(task);
+    return task;
   }
 
   findAll() {
-    return `This action returns all tasks`;
+    return this.tasks;
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} task`;
+    return this.tasks.find((task) => task.id == id);
   }
 
   update(id: number, updateTaskDto: UpdateTaskDto) {
-    return `This action updates a #${id} task`;
+    const task = this.tasks.find((task) => task.id == id);
+    task.contents = updateTaskDto.contents;
+    return task;
   }
 
   remove(id: number) {
-    return `This action removes a #${id} task`;
+    const index = this.tasks.findIndex((task) => task.id == id);
+
+    if (index >= 0) {
+      return this.tasks.splice(index, 1);
+    } else {
+      return;
+    }
   }
 }
