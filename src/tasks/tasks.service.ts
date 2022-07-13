@@ -9,7 +9,7 @@ export class TasksService {
     { id: 2, contents: 'add api prefix to path', done: true },
     { id: 3, contents: 'return json', done: false },
   ];
-  private lastId = 4;
+  private lastId = this.tasks.length + 1;
 
   create(createTaskDto: CreateTaskDto) {
     this.lastId++;
@@ -32,7 +32,9 @@ export class TasksService {
 
   update(id: number, updateTaskDto: UpdateTaskDto) {
     const task = this.tasks.find((task) => task.id == id);
-    task.contents = updateTaskDto.contents;
+    Object.keys(updateTaskDto).forEach((key) => {
+      task[key] = updateTaskDto[key];
+    });
     return task;
   }
 
