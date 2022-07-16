@@ -19,18 +19,18 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post()
-  create(@Body() createTaskDto: CreateTaskDto) {
-    return this.tasksService.create(createTaskDto);
+  async create(@Body() createTaskDto: CreateTaskDto) {
+    return await this.tasksService.create(createTaskDto);
   }
 
   @Get()
-  findAll() {
-    return this.tasksService.findAll();
+  async findAll() {
+    return await this.tasksService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    const task = this.tasksService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const task = await this.tasksService.findOne(+id);
 
     if (task) {
       return task;
@@ -40,8 +40,8 @@ export class TasksController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    const task = this.tasksService.update(+id, updateTaskDto);
+  async update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
+    const task = await this.tasksService.update(+id, updateTaskDto);
 
     if (task) {
       return task;
@@ -52,8 +52,8 @@ export class TasksController {
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string) {
-    const task = this.tasksService.remove(+id);
+  async remove(@Param('id') id: string) {
+    const task = await this.tasksService.remove(+id);
 
     if (!task) {
       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);

@@ -1,50 +1,44 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { Task } from './entities/task.entity';
 
 @Injectable()
 export class TasksService {
-  private readonly tasks = [
-    { id: 1, contents: 'generate resource', done: true },
-    { id: 2, contents: 'add api prefix to path', done: true },
-    { id: 3, contents: 'return json', done: false },
-  ];
-  private lastId = this.tasks.length + 1;
+  constructor(
+    @InjectRepository(Task)
+    private tasksRepository: Repository<Task>,
+  ) {}
 
-  create(createTaskDto: CreateTaskDto) {
-    this.lastId++;
-    const task = {
-      id: this.lastId,
-      contents: createTaskDto.contents,
-      done: false,
-    };
-    this.tasks.push(task);
-    return task;
-  }
-
-  findAll() {
-    return this.tasks;
-  }
-
-  findOne(id: number) {
-    return this.tasks.find((task) => task.id == id);
-  }
-
-  update(id: number, updateTaskDto: UpdateTaskDto) {
-    const task = this.tasks.find((task) => task.id == id);
-    Object.keys(updateTaskDto).forEach((key) => {
-      task[key] = updateTaskDto[key];
+  async create(createTaskDto: CreateTaskDto): Promise<Task> {
+    const insertResult = await this.tasksRepository.insert(createTaskDto);
+    return this.tasksRepository.findOneBy({
+      id: insertResult.identifiers[0].id,
     });
-    return task;
   }
 
-  remove(id: number) {
-    const index = this.tasks.findIndex((task) => task.id == id);
+  findAll(): Promise<Task[]> {
+    return this.tasksRepository.find();
+  }
 
-    if (index >= 0) {
-      return this.tasks.splice(index, 1);
+  findOne(id: number): Promise<Task> {
+    return this.tasksRepository.findOneBy({ id });
+  }
+
+  async update(id: number, updateTaskDto: UpdateTaskDto): Promise<Task> {
+    const updateResult = await this.tasksRepository.update(id, updateTaskDto);
+
+    if (updateResult.affected) {
+      return this.tasksRepository.findOneBy({ id });
     } else {
       return;
     }
+  }
+
+  async remove(id: number): Promise<boolean> {
+    const deleteResult = await this.tasksRepository.delete(id);
+    return Boolean(deleteResult.affected);
   }
 }
