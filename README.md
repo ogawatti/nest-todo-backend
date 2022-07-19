@@ -38,12 +38,18 @@ $ npm run test:cov
 $ docker build . -t nest-todo-backend
 ```
 
-### Running the app on Docker
+### Running the app with production mode on Docker at local
 
 #### Start
 
 ```bash
-$ docker run -p 3000:80 --rm nest-todo-backend
+$ docker run --rm \
+             -p 3000:80 \
+             --env DB_HOST=db \
+             --env DB_USERNAME=root \
+             --env DB_PASSWORD=passwd \
+             --network docker-database_default \
+             nest-todo-backend
 ```
 
 #### Stop

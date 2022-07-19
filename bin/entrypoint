@@ -1,0 +1,8 @@
+#!/bin/bash
+# Copyright (c) 2022 RICOH COMPANY, Ltd. All Rights Reserved.
+
+SQL="CREATE DATABASE IF NOT EXISTS nest_todo_production"
+mysql -h $DB_HOST -u $DB_USERNAME -p$DB_PASSWORD --protocol tcp -e "$SQL"
+
+yarn ts-node ./node_modules/.bin/typeorm migration:run -d src/data-source.ts 
+yarn start:prod
