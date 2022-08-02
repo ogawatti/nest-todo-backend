@@ -1,3 +1,4 @@
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSourceOptions } from '../data-source';
@@ -37,6 +38,8 @@ describe('TasksController', () => {
   task.content = 'test';
   const taskId = String(task.id);
 
+  const errorNotFound = new HttpException('Not Found', HttpStatus.NOT_FOUND);
+
   describe('create', () => {
     it('should return a task', async () => {
       const spy = jest
@@ -65,41 +68,86 @@ describe('TasksController', () => {
   });
 
   describe('findOne', () => {
-    it('should return a tasks', async () => {
-      const spy = jest
-        .spyOn(service, 'findOne')
-        .mockImplementation(() => Promise.resolve(task));
+    describe('when specified task found', () => {
+      it('should return a task', async () => {
+        const spy = jest
+          .spyOn(service, 'findOne')
+          .mockImplementation(() => Promise.resolve(task));
 
-      expect(await controller.findOne(taskId)).toBe(task);
-      expect(spy).toHaveBeenCalledWith(task.id);
-      spy.mockRestore();
+        expect(await controller.findOne(taskId)).toBe(task);
+        expect(spy).toHaveBeenCalledWith(task.id);
+        spy.mockRestore();
+      });
+    });
+
+    describe('when specified task does not found', () => {
+      it('should throw exception', async () => {
+        const spy = jest
+          .spyOn(service, 'findOne')
+          .mockImplementation(() => Promise.resolve(null));
+
+        await expect(controller.findOne(taskId)).rejects.toThrow(errorNotFound);
+        expect(spy).toHaveBeenCalledWith(task.id);
+        spy.mockRestore();
+      });
     });
   });
 
   describe('update', () => {
-    it('should return a tasks', async () => {
-      const spy = jest
-        .spyOn(service, 'update')
-        .mockImplementation(() => Promise.resolve(task));
-      const updateTaskDto = new UpdateTaskDto();
-      updateTaskDto.content = 'test';
-      updateTaskDto.done = true;
+    const updateTaskDto = new UpdateTaskDto();
+    updateTaskDto.content = 'test';
+    updateTaskDto.done = true;
 
-      expect(await controller.update(taskId, updateTaskDto)).toBe(task);
-      expect(spy).toHaveBeenCalledWith(task.id, updateTaskDto);
-      spy.mockRestore();
+    describe('when specified task found', () => {
+      it('should return a task', async () => {
+        const spy = jest
+          .spyOn(service, 'update')
+          .mockImplementation(() => Promise.resolve(task));
+
+        expect(await controller.update(taskId, updateTaskDto)).toBe(task);
+        expect(spy).toHaveBeenCalledWith(task.id, updateTaskDto);
+        spy.mockRestore();
+      });
+    });
+
+    describe('when specified task does not found', () => {
+      it('should throw exception', async () => {
+        const spy = jest
+          .spyOn(service, 'update')
+          .mockImplementation(() => Promise.resolve(undefined));
+
+        await expect(controller.update(taskId, updateTaskDto)).rejects.toThrow(
+          errorNotFound,
+        );
+        expect(spy).toHaveBeenCalledWith(task.id, updateTaskDto);
+        spy.mockRestore();
+      });
     });
   });
 
   describe('remove', () => {
-    it('should not return body', async () => {
-      const spy = jest
-        .spyOn(service, 'remove')
-        .mockImplementation(() => Promise.resolve(true));
+    describe('when specified task found', () => {
+      it('should return undefined', async () => {
+        const spy = jest
+          .spyOn(service, 'remove')
+          .mockImplementation(() => Promise.resolve(true));
 
-      expect(await controller.remove(taskId)).toBe(undefined);
-      expect(spy).toHaveBeenCalledWith(task.id);
-      spy.mockRestore();
+        expect(await controller.remove(taskId)).toBe(undefined);
+        expect(spy).toHaveBeenCalledWith(task.id);
+        spy.mockRestore();
+      });
+    });
+
+    describe('when specified task does not found', () => {
+      it('should throw exception', async () => {
+        const spy = jest
+          .spyOn(service, 'remove')
+          .mockImplementation(() => Promise.resolve(false));
+
+        await expect(controller.remove(taskId)).rejects.toThrow(errorNotFound);
+        expect(spy).toHaveBeenCalledWith(task.id);
+        spy.mockRestore();
+      });
     });
   });
 });
