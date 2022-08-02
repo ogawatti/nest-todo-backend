@@ -39,7 +39,10 @@ describe('TasksController', () => {
   const taskId = String(task.id);
 
   const errorNotFound = new HttpException('Not Found', HttpStatus.NOT_FOUND);
-  const errorBadRequest = new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+  const errorBadRequest = new HttpException(
+    'Bad Request',
+    HttpStatus.BAD_REQUEST,
+  );
 
   describe('create', () => {
     it('should return a task', async () => {
