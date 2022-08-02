@@ -41,6 +41,10 @@ export class TasksController {
 
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
+    if (Object.keys(updateTaskDto).length == 0) {
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+    }
+
     const task = await this.tasksService.update(+id, updateTaskDto);
 
     if (task) {

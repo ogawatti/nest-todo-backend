@@ -39,6 +39,7 @@ describe('TasksController', () => {
   const taskId = String(task.id);
 
   const errorNotFound = new HttpException('Not Found', HttpStatus.NOT_FOUND);
+  const errorBadRequest = new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
 
   describe('create', () => {
     it('should return a task', async () => {
@@ -94,11 +95,11 @@ describe('TasksController', () => {
   });
 
   describe('update', () => {
-    const updateTaskDto = new UpdateTaskDto();
-    updateTaskDto.content = 'test';
-    updateTaskDto.done = true;
-
     describe('when specified task found', () => {
+      const updateTaskDto = new UpdateTaskDto();
+      updateTaskDto.content = 'test';
+      updateTaskDto.done = true;
+
       it('should return a task', async () => {
         const spy = jest
           .spyOn(service, 'update')
@@ -111,6 +112,10 @@ describe('TasksController', () => {
     });
 
     describe('when specified task does not found', () => {
+      const updateTaskDto = new UpdateTaskDto();
+      updateTaskDto.content = 'test';
+      updateTaskDto.done = true;
+
       it('should throw exception', async () => {
         const spy = jest
           .spyOn(service, 'update')
@@ -121,6 +126,16 @@ describe('TasksController', () => {
         );
         expect(spy).toHaveBeenCalledWith(task.id, updateTaskDto);
         spy.mockRestore();
+      });
+    });
+
+    describe('when request body is empty', () => {
+      const updateTaskDto = new UpdateTaskDto();
+
+      it('should throw exception', async () => {
+        await expect(controller.update(taskId, updateTaskDto)).rejects.toThrow(
+          errorBadRequest,
+        );
       });
     });
   });
