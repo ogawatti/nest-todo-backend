@@ -49,34 +49,56 @@ describe('TasksService', () => {
   });
 
   describe('findAll', () => {
-    const count = 3;
+    describe('when tasks are already created', () => {
+      const count = 3;
 
-    beforeEach(async () => {
-      await Promise.all(
-        [...Array(count)].map(() => {
-          return repository.insert({ content: 'test' });
-        }),
-      );
+      beforeEach(async () => {
+        return Promise.all(
+          [...Array(count)].map(() => {
+            return repository.insert({ content: 'test' });
+          }),
+        );
+      });
+
+      it('should return an array of tasks', async () => {
+        const tasks = await service.findAll();
+
+        expect(tasks).toHaveLength(count);
+        expect(tasks[0]).toBeInstanceOf(Task);
+      });
     });
 
-    it('should return an array of tasks', async () => {
-      const tasks = await service.findAll();
+    describe('when tasks are not created yet', () => {
+      it('should return an array of tasks', async () => {
+        const tasks = await service.findAll();
 
-      expect(tasks).toHaveLength(count);
-      expect(tasks[0]).toBeInstanceOf(Task);
+        expect(tasks).toHaveLength(0);
+      });
     });
   });
 
   describe('findOne', () => {
     beforeEach(async () => await repository.insert({ content: 'test' }));
 
-    it('should return a task', async () => {
-      const tasks = await repository.find();
-      const { id } = tasks.pop();
-      const task = await service.findOne(id);
+    describe('when query is success', () => {
+      it('should return a task', async () => {
+        const tasks = await repository.find();
+        const { id } = tasks.pop();
+        const task = await service.findOne(id);
 
-      expect(task).toBeInstanceOf(Task);
-      expect(task.id).toBe(id);
+        expect(task).toBeInstanceOf(Task);
+        expect(task.id).toBe(id);
+      });
+    });
+
+    describe('when query is failure', () => {
+      it('should return null', async () => {
+        const tasks = await repository.find();
+        const { id } = tasks.pop();
+        const result = await service.findOne(id + 1);
+
+        expect(result).toBe(null);
+      });
     });
   });
 
@@ -89,27 +111,51 @@ describe('TasksService', () => {
 
     beforeEach(async () => await repository.insert({ content: 'test' }));
 
-    it('should return an updated task', async () => {
-      const tasks = await repository.find();
-      const { id } = tasks.pop();
-      const task = await service.update(id, updateTaskDto);
+    describe('when query is success', () => {
+      it('should return an updated task', async () => {
+        const tasks = await repository.find();
+        const { id } = tasks.pop();
+        const task = await service.update(id, updateTaskDto);
 
-      expect(task).toBeInstanceOf(Task);
-      expect(task.id).toBe(id);
-      expect(task.content).toBe(content);
-      expect(task.done).toBe(done);
+        expect(task).toBeInstanceOf(Task);
+        expect(task.id).toBe(id);
+        expect(task.content).toBe(content);
+        expect(task.done).toBe(done);
+      });
+    });
+
+    describe('when query is failure', () => {
+      it('should return undefined', async () => {
+        const tasks = await repository.find();
+        const { id } = tasks.pop();
+        const result = await service.update(id + 1, updateTaskDto);
+
+        expect(result).toBe(undefined);
+      });
     });
   });
 
   describe('remove', () => {
     beforeEach(async () => await repository.insert({ content: 'test' }));
 
-    it('should return true', async () => {
-      const tasks = await repository.find();
-      const { id } = tasks.pop();
-      const succeed = await service.remove(id);
+    describe('when query is success', () => {
+      it('should return true', async () => {
+        const tasks = await repository.find();
+        const { id } = tasks.pop();
+        const succeed = await service.remove(id);
 
-      expect(succeed).toBe(true);
+        expect(succeed).toBe(true);
+      });
+    });
+
+    describe('when query is failure', () => {
+      it('should return false', async () => {
+        const tasks = await repository.find();
+        const { id } = tasks.pop();
+        const succeed = await service.remove(id + 1);
+
+        expect(succeed).toBe(false);
+      });
     });
   });
 });
