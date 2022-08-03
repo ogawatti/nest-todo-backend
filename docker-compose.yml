@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:8.0-oracle
+    environment:
+      MYSQL_DATABASE: nest_todo_development
+      MYSQL_ROOT_PASSWORD: passwd
+      TZ: 'Asia/Tokyo'
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --innodb_use_native_aio=0
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
